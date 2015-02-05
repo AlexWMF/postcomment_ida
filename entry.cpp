@@ -66,7 +66,6 @@ static void idaapi run(int)
 
 static int idaapi init()
 {
-	//msg("init");
 	if (ph.id != PLFM_386)
 		return PLUGIN_SKIP;
 	return PLUGIN_KEEP;
@@ -74,7 +73,6 @@ static int idaapi init()
 
 void idaapi term()
 {
-	//msg("term");
 }
 
 plugin_t PLUGIN =
@@ -87,5 +85,5 @@ plugin_t PLUGIN =
 	NULL,                 // long comment about the plugin
 	NULL,                 // multiline help about the plugin
 	"AlexWMF | Add posterior comments to all calls in this function",// the preferred short name of the plugin
-	"F4"                  // the preferred hotkey to run the plugin
+	"F3"                  // the preferred hotkey to run the plugin
 };

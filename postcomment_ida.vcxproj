@@ -93,7 +93,7 @@
       <AdditionalOptions>/EXPORT:PLUGIN %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>copy /B /Y "$(SolutionDir)bin\$(TargetFileName)" $(SolutionDir)..\IDA66\plugins\$(ProjectName)$(TargetExt)</Command>
+      <Command>copy /B /Y "$(SolutionDir)bin\$(TargetFileName)" C:\IDA67\plugins\$(ProjectName)$(TargetExt)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
