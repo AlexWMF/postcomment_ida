@@ -25,6 +25,8 @@ static void idaapi run(int)
 	func_t* const f = get_func(ea);
 	if (!f)
 		return;
+	char funcName[MAXSTR] = {};
+	get_func_name(ea, funcName, MAXSTR);
 
 	func_item_iterator_t it;
 	if (!it.set(f))
@@ -35,7 +37,7 @@ static void idaapi run(int)
 	do
 	{
 		ea_t e = it.current();
-		if (e == BADADDR || e < ea)
+		if (e == BADADDR)
 			continue;
 		funcItems.push_back(e);
 	} while (it.next_code());
@@ -61,7 +63,7 @@ static void idaapi run(int)
 		setFlbits(e, 0x00002000LU); // FL_LINE, FIXME: limitation by IDA API
 		cnt++;
 	}
-	msg("POSTCOMM: Added %u posteriors\n", cnt);
+	msg("POSTCOMM: Added %u posteriors to func:%s\n", cnt, funcName);
 }
 
 static int idaapi init()
