@@ -1,5 +1,5 @@
 # Purposes
-Add posterior comments (empty line) after each 'call' instruction beginning form current cursor position till the end of current function.
+Add posterior comments (empty line) after each 'call' instruction in function at cursor.
 
 # How build
   - Put IDA PRO >= 6.6 SDK in ```sdk``` folder
