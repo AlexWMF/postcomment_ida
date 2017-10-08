@@ -12,27 +12,33 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 	return TRUE;
 }
 
-static void idaapi run(int)
+void addPosteriorCommentsToSelectedFunc()
 {
 	ea_t ea = get_screen_ea();
 	if (ea == BADADDR)
 		return;
 
+#if (IDA_SDK_VERSION < 700)
 	flags_t flags = getFlags(ea);
 	if (!isCode(flags))
 		return;
-
+#else // IDA_SDK_VERSION < 700
+	flags_t flags = get_flags(ea);
+	if (!is_code(flags))
+		return;
+#endif // IDA_SDK_VERSION < 700
 	func_t* const f = get_func(ea);
 	if (!f)
 		return;
-	char funcName[MAXSTR] = {};
-	get_func_name(ea, funcName, MAXSTR);
 
 	func_item_iterator_t it;
 	if (!it.set(f))
 		return;
 
+	qstring qmnem;
+#if (IDA_SDK_VERSION < 700)
 	char mnem[MAXSTR] = {};
+#endif // IDA_SDK_VERSION < 700
 	qvector<ea_t> funcItems;
 	do
 	{
@@ -47,24 +53,56 @@ static void idaapi run(int)
 	for (size_t i = 0; i < len; ++i)
 	{
 		const ea_t e = funcItems[i];
+#if (IDA_SDK_VERSION < 700)
 		mnem[0] = '\0';
 		if (!ua_mnem(e, mnem, MAXSTR))
 			return;
-		if (StrCmpIA(mnem, "call") != 0)
+#else // IDA_SDK_VERSION < 700
+		if (!print_insn_mnem(&qmnem, e))
+			return;
+#endif // IDA_SDK_VERSION < 700
+
+		if (StrCmpIA(qmnem.c_str(), "call") != 0)
 			continue;
 		if (i < len - 1)
 		{
-			const ea_t cRef = get_first_fcref_to(funcItems[i+1]);
+			const ea_t cRef = get_first_fcref_to(funcItems[i + 1]);
 			if (cRef != BADADDR)  // check is there also space after provided by label of xref
 				continue;
 		}
 
 		update_extra_cmt(e, E_NEXT, " ");
+#if (IDA_SDK_VERSION < 700)
 		setFlbits(e, 0x00002000LU); // FL_LINE, FIXME: limitation by IDA API
+#endif // IDA_SDK_VERSION < 700
 		cnt++;
 	}
-	msg("POSTCOMM: Added %u posteriors to func:%s\n", cnt, funcName);
+
+	qstring qfuncName;
+#if (IDA_SDK_VERSION < 700)
+	char funcName[MAXSTR] = {};
+	get_func_name(ea, funcName, MAXSTR);
+	qfuncName = funcName;
+#else // IDA_SDK_VERSION < 700
+	get_func_name(&qfuncName, ea);
+#endif // IDA_SDK_VERSION < 700
+	msg("POSTCOMM: Added %u posteriors to func:%s\n", cnt, qfuncName.c_str());
 }
+
+
+#if (IDA_SDK_VERSION < 700)
+static void idaapi run(int)
+{
+	addPosteriorCommentsToSelectedFunc();
+}
+#else
+static bool idaapi run(std::size_t)
+{
+	addPosteriorCommentsToSelectedFunc();
+	return true;
+}
+#endif
+
 
 static int idaapi init()
 {
